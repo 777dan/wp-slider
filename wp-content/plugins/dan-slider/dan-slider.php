@@ -29,6 +29,8 @@ add_action('wp_enqueue_scripts', 'kc_enqueue_scripts', 100);
 // add_filter('the_content', 'kc_show_carousel');
 add_action('admin_menu', 'kc_create_menu');
 
+add_action('admin_enqueue_scripts', 'wp_enqueue_media');
+
 // Shortcodes
 function dan_show_slider_shortcode($content)
 {

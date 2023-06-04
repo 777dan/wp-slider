@@ -38,5 +38,3 @@ function kc_enqueue_scripts()
     wp_enqueue_style('kc_theme');
 }
 
-// Обработчик AJAX-запроса для загрузки файла
-
