@@ -26,7 +26,12 @@ function register_mysettings()
     add_settings_field('custom_img_field', 'Background custom image', 'kc_bg_custom_img', 'bg_settings_page', 'bg_settings');
     add_settings_field('custom_color_field', 'Background custom color', 'kc_bg_custom_color', 'bg_settings_page', 'bg_settings');
 
-    add_settings_section('settings_id1', 'Other settings', '', 'settings_page1');
+    add_settings_section('other_settings', 'Other settings', '', 'other_settings_page');
+    add_settings_field('post_type_field', 'Post type', 'kc_post_type', 'other_settings_page', 'other_settings');
+    add_settings_field('category_name_field', 'Categoty name', 'kc_catergory_name', 'other_settings_page', 'other_settings');
+    add_settings_field('text_color_field', 'Text color', 'kc_text_color', 'other_settings_page', 'other_settings');
+    add_settings_field('posts_tag_field', 'Posts tag', 'kc_tag', 'other_settings_page', 'other_settings');
+    add_settings_field('posts_count_field', 'Posts count', 'kc_count', 'other_settings_page', 'other_settings');
 ?>
 <?php
 }
@@ -40,33 +45,6 @@ function kc_background_type()
         echo '<option value="custom_color" ' . selected(get_option('kc_background_type'), 'custom_color') . '>Custom color</option>';
         ?>
     </select>
-    <script>
-        jQuery(document).ready(function($) {
-            function disable_img() {
-                $('.custom_image').each(function(disabled_img_index, disabled_img_value) {
-                    $(disabled_img_value).prop('disabled', true);
-                    $(disabled_img_value).css('opacity', '0.5');
-                });
-            }
-
-            function disable_color() {
-                $('#custom_color').prop('disabled', true);
-                $('#custom_color').css('opacity', '0.5');
-            }
-
-            function unable_img() {
-                $('.custom_image').each(function(unabled_img_index, unabled_img_value) {
-                    $(unabled_img_value).prop('disabled', false);
-                    $(unabled_img_value).css('opacity', '1');
-                });
-            }
-
-            function unable_color() {
-                $('#custom_color').prop('disabled', false);
-                $('#custom_color').css('opacity', '1');
-            }
-        });
-    </script>
     <?php
     if (get_option('kc_background_type') === 'custom_color') {
     ?>
@@ -153,25 +131,71 @@ function kc_bg_custom_img()
     </script>
 <?php
 }
-function kc_settings_page()
+
+function kc_post_type()
 {
     $kc_post_types = get_post_types(['public' => true]);
     unset($kc_post_types['attachment']);
+?>
+    <select name="kc_post_type" id="kc_post_type">
+        <?php foreach ($kc_post_types as $kc_post_type) {
+            echo '<option value="' . $kc_post_type . '" ' . selected(get_option('kc_post_type'), $kc_post_type) . '>' . $kc_post_type . '</option>';
+        }
+        ?>
+    </select>
+<?php
+}
+function kc_catergory_name()
+{
     $kc_categories = get_categories([
         'taxonomy' => 'category'
     ]);
-    $nonce = wp_create_nonce('my_action');
+?>
+    <select name="kc_category_name" id="kc_category_name">
+        <?php
+        foreach ($kc_categories as $kc_category) {
+            echo '<option value="' . $kc_category->name . '" ' . selected(get_option('kc_category_name'), $kc_category->name) . '>' . ($kc_category->name ? $kc_category->name : "none") . '</option>';
+        }
+        ?>
+    </select>
+<?php
+}
+function kc_text_color()
+{
+?>
+    <input type="color" name="kc_text_color" value="<?php echo get_option('kc_text_color'); ?>" />
+<?php
+}
+function kc_tag()
+{
+?>
+    <input type="text" name="kc_tag" value="<?php echo get_option('kc_tag'); ?>" />
+<?php
+}
+function kc_count()
+{
+?>
+    <input type="number" name="kc_count" value="<?php echo get_option('kc_count'); ?>" min="1" max="12" />
+<?php
+}
+function kc_settings_page()
+{
+    // wp_nonce_field('name_of_my_action', 'name_of_nonce_field');
+    // if (empty($_POST) || !wp_verify_nonce($_POST['name_of_nonce_field'], 'name_of_my_action')) {
+    //     // var_dump(wp_nonce_field('name_of_my_action', 'name_of_nonce_field'));
+    //     print 'Извините, проверочные данные не соответствуют.';
+    //     exit;
+    // }
 ?>
     <div class="wrap">
         <h2>Dan slider</h2>
         <form enctype="multipart/form-data" method="post" action="options.php">
             <?php
+            wp_nonce_field('name_of_my_action', 'name_of_nonce_field');
             settings_fields('kc-settings-group');
             do_settings_sections('bg_settings_page');
-            do_settings_sections('settings_page1');
+            do_settings_sections('other_settings_page');
             submit_button();
-
-            wp_nonce_field('my_action', 'my_nonce');
             ?>
             <script>
                 jQuery(document).ready(function($) {
@@ -202,47 +226,14 @@ function kc_settings_page()
                     });
                 });
             </script>
-            <table class="form-table">
-                <tr valign="top">
-                    <th scope="row">Post Type</th>
-                    <td>
-                        <select name="kc_post_type" id="kc_post_type">
-                            <?php foreach ($kc_post_types as $kc_post_type) {
-                                echo '<option value="' . $kc_post_type . '" ' . selected(get_option('kc_post_type'), $kc_post_type) . '>' . $kc_post_type . '</option>';
-                            }
-                            ?>
-                        </select>
-
-                    </td>
-                </tr>
-                <tr valign="top">
-                    <th scope="row">Category Name</th>
-                    <td>
-                        <select name="kc_category_name" id="kc_category_name">
-                            <?php
-                            foreach ($kc_categories as $kc_category) {
-                                echo '<option value="' . $kc_category->name . '" ' . selected(get_option('kc_category_name'), $kc_category->name) . '>' . ($kc_category->name ? $kc_category->name : "none") . '</option>';
-                            }
-                            ?>
-                        </select>
-
-                    </td>
-                </tr>
-                <tr valign="top">
-                    <th scope="row">Text color</th>
-                    <td><input type="color" name="kc_text_color" value="<?php echo get_option('kc_text_color'); ?>" /></td>
-                </tr>
-                <tr valign="top">
-                    <th scope="row">Tags</th>
-                    <td><input type="text" name="kc_tag" value="<?php echo get_option('kc_tag'); ?>" /></td>
-                </tr>
-                <tr valign="top">
-                    <th scope="row">Count</th>
-                    <td><input type="number" name="kc_count" value="<?php echo get_option('kc_count'); ?>" min="1" max="12" /></td>
-                </tr>
-            </table>
         </form>
     </div>
 <?php
+    if (isset($_POST['submit'])) {
+        if (empty($_POST) || !wp_verify_nonce($_POST['name_of_nonce_field'], 'name_of_my_action')) {
+            print 'Sorry, the verification data does not match.';
+            exit;
+        }
+    }
 }
 ?>
