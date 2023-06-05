@@ -88,7 +88,7 @@ function kc_bg_custom_img()
                         const attachment = uploader.state().get('selection').first().toJSON();
 
                         document.getElementById('image_attachment_id').value = attachment.id;
-                        document.getElementById('IMAGE_PLACEHOLDER_ID').innerHTML = '<img src="' + attachment.url + '" />';
+                        document.getElementById('IMAGE_PLACEHOLDER_ID').innerHTML = '<img width="150px" height="94px" src="' + attachment.url + '" />';
                     })
                     .open(event.target);
             }
