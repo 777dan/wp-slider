@@ -14,15 +14,16 @@ function register_mysettings()
     register_setting('kc-settings-group', 'kc_post_type');
     register_setting('kc-settings-group', 'kc_category_name');
     register_setting('kc-settings-group', 'kc_bg_color');
-    register_setting('kc-settings-group', 'kc_bg_img');
     register_setting('kc-settings-group', 'image_attachment_id');
     register_setting('kc-settings-group', 'kc_background_type');
+    register_setting('kc-settings-group', 'kc_default_background_type');
     register_setting('kc-settings-group', 'kc_text_color');
     register_setting('kc-settings-group', 'kc_tag');
     register_setting('kc-settings-group', 'kc_count');
 
     add_settings_section('bg_settings', 'Background settings', '', 'bg_settings_page');
     add_settings_field('kc_background_type', 'Background type', 'kc_background_type', 'bg_settings_page', 'bg_settings');
+    add_settings_field('kc_default_background_type', 'Default background type', 'kc_default_background_type', 'bg_settings_page', 'bg_settings');
     add_settings_field('custom_img_field', 'Background custom image', 'kc_bg_custom_img', 'bg_settings_page', 'bg_settings');
     add_settings_field('custom_color_field', 'Background custom color', 'kc_bg_custom_color', 'bg_settings_page', 'bg_settings');
 
@@ -38,67 +39,37 @@ function register_mysettings()
 function kc_background_type()
 {
 ?>
-    <select name="kc_background_type" id="kc_background_type">
+    <select name="kc_background_type">
         <?php
         echo '<option value="post_image" ' . selected(get_option('kc_background_type'), 'post_image') . '>Post image</option>';
         echo '<option value="custom_image" ' . selected(get_option('kc_background_type'), 'custom_image') . '>Custom image</option>';
         echo '<option value="custom_color" ' . selected(get_option('kc_background_type'), 'custom_color') . '>Custom color</option>';
         ?>
     </select>
-    <?php
-    if (get_option('kc_background_type') === 'custom_color') {
-    ?>
-        <script>
-            jQuery(document).ready(function($) {
-                $('#custom_color').prop('disabled', false);
-                $('#custom_color').css('opacity', '1');
-                $('.custom_image').each(function(disabled_img_value, disabled_img_value) {
-                    $(disabled_img_value).prop('disabled', true);
-                    $(disabled_img_value).css('opacity', '0.5');
-                });
-            });
-        </script>
-    <?php
-    }
-    if (get_option('kc_background_type') === 'custom_image') {
-    ?>
-        <script>
-            jQuery(document).ready(function($) {
-                $('.custom_image').each(function(unabled_img_index, unabled_img_value) {
-                    $(unabled_img_value).prop('disabled', false);
-                    $(unabled_img_value).css('opacity', '1');
-                });
-                $('#custom_color').prop('disabled', true);
-                $('#custom_color').css('opacity', '0.5');
-            });
-        </script>
-    <?php
-    } else {
-    ?>
-        <script>
-            jQuery(document).ready(function($) {
-                $('.custom_image').each(function(disabled_img_value, disabled_img_value) {
-                    $(disabled_img_value).prop('disabled', true);
-                    $(disabled_img_value).css('opacity', '0.5');
-                });
-                $('#custom_color').prop('disabled', true);
-                $('#custom_color').css('opacity', '0.5');
-            });
-        </script>
-    <?php
-    }
+<?php
+}
+
+function kc_default_background_type()
+{
+?>
+    <select name="kc_default_background_type">
+        <?php
+        echo '<option value="default_image" ' . selected(get_option('kc_default_background_type'), 'default_image') . '>Default image</option>';
+        echo '<option value="default_color" ' . selected(get_option('kc_default_background_type'), 'default_color') . '>Default color</option>';
+        ?>
+    </select>
+<?php
 }
 function kc_bg_custom_color()
 {
-    ?>
-    <input id="custom_color" disabled style="opacity: 0.2;" type="color" name="kc_bg_color" value="<?php echo get_option('kc_bg_color'); ?>" />
+?>
+    <input id="custom_color" type="color" name="kc_bg_color" value="<?php echo get_option('kc_bg_color'); ?>" />
 <?php
 }
 function kc_bg_custom_img()
 {
 ?>
     <input id="image_attachment_id" name="image_attachment_id" value="<?php echo get_option('image_attachment_id'); ?>" type="hidden" />
-    <input id="HIDDEN_TEXT_INPUT_ID" name="HIDDEN_TEXT_INPUT_NAME" value="HIDDEN_TEXT_INPUT_VALUE" type="hidden" />
     <div id="IMAGE_PLACEHOLDER_ID">
         <?php echo wp_get_attachment_image(get_option('image_attachment_id'), 'thumbnail', false, array('class' => 'custom_image')); ?>
 
@@ -117,14 +88,13 @@ function kc_bg_custom_img()
                         const attachment = uploader.state().get('selection').first().toJSON();
 
                         document.getElementById('image_attachment_id').value = attachment.id;
-                        document.getElementById('HIDDEN_TEXT_INPUT_ID').value = attachment.id;
                         document.getElementById('IMAGE_PLACEHOLDER_ID').innerHTML = '<img src="' + attachment.url + '" />';
                     })
                     .open(event.target);
             }
 
             if (event.target.classList.contains('YOUR_DELETE_BUTTON_CLASS')) {
-                document.getElementById('HIDDEN_TEXT_INPUT_ID').value = 0;
+                document.getElementById('image_attachment_id').value = 0;
                 document.getElementById('IMAGE_PLACEHOLDER_ID').innerHTML = '';
             }
         }, false);
@@ -180,12 +150,6 @@ function kc_count()
 }
 function kc_settings_page()
 {
-    // wp_nonce_field('name_of_my_action', 'name_of_nonce_field');
-    // if (empty($_POST) || !wp_verify_nonce($_POST['name_of_nonce_field'], 'name_of_my_action')) {
-    //     // var_dump(wp_nonce_field('name_of_my_action', 'name_of_nonce_field'));
-    //     print 'Извините, проверочные данные не соответствуют.';
-    //     exit;
-    // }
 ?>
     <div class="wrap">
         <h2>Dan slider</h2>
@@ -197,35 +161,6 @@ function kc_settings_page()
             do_settings_sections('other_settings_page');
             submit_button();
             ?>
-            <script>
-                jQuery(document).ready(function($) {
-                    $('#kc_background_type').change(function() {
-                        const option_val = $(this).val();
-                        const options_arr = ['.custom_image', '#custom_color'];
-                        $.each(options_arr, function(index, value) {
-                            if (value[0] === '.') {
-                                $('.custom_image').each(function(disabled_img_index, disabled_img_value) {
-                                    $(disabled_img_value).prop('disabled', true);
-                                    $(disabled_img_value).css('opacity', '0.5');
-                                });
-                            } else {
-                                $(value).prop('disabled', true);
-                                $(value).css('opacity', '0.5');
-                            }
-                        });
-                        if (option_val === 'custom_image') {
-                            $('.custom_image').each(function(unabled_img_index, unabled_img_value) {
-                                $(unabled_img_value).prop('disabled', false);
-                                $(unabled_img_value).css('opacity', '1');
-                            });
-                        }
-                        if (option_val === 'custom_color') {
-                            $('#custom_color').prop('disabled', false);
-                            $('#custom_color').css('opacity', '1');
-                        }
-                    });
-                });
-            </script>
         </form>
     </div>
 <?php

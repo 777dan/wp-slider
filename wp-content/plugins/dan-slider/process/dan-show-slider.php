@@ -7,6 +7,7 @@ function dan_show_slider($content)
         'showposts' => get_option('kc_count') ? get_option('kc_count') : 3,
         'category_name' => get_option('kc_category_name'),
         'post_bg' => get_option('kc_background_type'),
+        'default_post_bg' => get_option('kc_default_background_type'),
         'tag' => get_option('kc_tag'),
         'post_status' => 'publish',
         'orderby' => 'date',
@@ -37,7 +38,14 @@ function dan_show_slider($content)
             $postNumber = 1;
             $html .= '<div class="carousel-item ' . $extraClass . '">';
             if ($args['post_bg'] === 'custom_color') $html .= '<div style="background-color: ' . get_option('kc_bg_color') . ';" class="d-block post_image w-100"></div>';
-            if ($args['post_bg'] === 'post_image') $html .= '<img class="d-block post_image w-100" alt="' . $post->post_title . '" src="' . wp_get_attachment_image_url(get_post_thumbnail_id($post->ID), 'full') . '">';
+            if ($args['post_bg'] === 'post_image') {
+                if (get_post_thumbnail_id($post->ID)) {
+                    $html .= '<img class="d-block post_image w-100" alt="' . $post->post_title . '" src="' . wp_get_attachment_image_url(get_post_thumbnail_id($post->ID), 'full') . '">';
+                } else {
+                    if ($args['default_post_bg'] === 'default_color') $html .= '<div style="background-color: ' . get_option('kc_bg_color') . ';" class="d-block post_image w-100"></div>';
+                    if ($args['default_post_bg'] === 'default_image') $html .= '<img class="d-block post_image w-100" alt="' . $post->post_title . '" src="' . wp_get_attachment_image_url(get_option('image_attachment_id'), 'full')  . '">';
+                }
+            }
             if ($args['post_bg'] === 'custom_image') $html .= '<img class="d-block post_image w-100" alt="' . $post->post_title . '" src="' . wp_get_attachment_image_url(get_option('image_attachment_id'), 'full')  . '">';
             $html .= '<div class="carousel-caption d-none d-md-block">
                 <h5><a style="color:' . get_option('kc_text_color') . ' !important;" class="post_name" href="' . get_permalink($post->ID) . '">' . $post->post_title . '</a></h5>';
